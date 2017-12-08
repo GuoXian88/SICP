@@ -1,1 +1,2 @@
-# SICP
+# SICP  
+just learning sicp
