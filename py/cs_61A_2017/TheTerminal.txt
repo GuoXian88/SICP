@@ -1,0 +1,24 @@
+
+On a Mac: Hold ⌘ (command) and press spacebar; this will open up the Spotlight Search.
+Type "Terminal", and you should see the app icon pop up. Double click it to open. 
+
+ For Mac users, I
+recommend you right click the icon in your home bar, and select "Options > Keep in Dock".
+You will be using this app a lot in this class
+
+1.Terminal:
+rename:
+mv /home/user/oldname /home/user/newname
+
+2.gzip
+In order to "zip" a directory, the correct command would be
+
+tar -zcvf archive.tar.gz directory/ 
+This will tell tar to c (create) an archive from the files in directory (tar is recursive by default), compress it using the z (gzip) algorithm, store the output as a f (file) named archive.tar.gz, and v (verbosely) list (on /dev/stderr so it doesn't affect piped commands) all the files it adds to the archive.
+
+To decompress and unpack the archive into the current directory you would use
+
+tar -zxvf archive.tar.gz
+That command is effectively the same as
+
+gunzip < archive.tar.gz | tar -xv
