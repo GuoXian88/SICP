@@ -88,3 +88,34 @@ def partition_tree(n, m):
 
 print(partition_tree(2, 2))
 
+
+'''
+local state
+'''
+
+def make_withdraw(balance):
+    '''
+    return a withdraw function that draws down a balance each call
+    '''
+    def withdraw(amount):
+        '''The nonlocal statement declares that whenever we change the binding of the name balance,
+        the binding is changed in the first frame in which balance is already bound.
+        The nonlocal statement indicates that the name appears somewhere in the environment
+        other than the first (local) frame or the last (global) frame.
+        any assignment statement with balance on the left-hand side of = will not bind balance
+        in the first frame of the current environment. Instead, it will find the first frame in
+        which balance was already defined and re-bind the name in that frame. If balance has not
+        previously been bound to a value, then the nonlocal statement will give an error.
+        '''
+        nonlocal balance
+        if amount > balance:
+            return 'Insufficient funds'
+        balance -= amount
+        return balance
+    return withdraw
+
+
+
+
+
+
