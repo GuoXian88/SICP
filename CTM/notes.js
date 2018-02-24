@@ -74,3 +74,7 @@ programming model we can express the full range of object-oriented programming
 techniques.  However, reasoning about object-oriented programs is harder than
 reasoning about functional programs.
 
+Functional abstraction
+ A list is actually a chain of links, where
+each link contains two things: one list element and a reference to the rest of the
+chain. 
