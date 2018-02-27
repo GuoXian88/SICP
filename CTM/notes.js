@@ -78,3 +78,8 @@ Functional abstraction
  A list is actually a chain of links, where
 each link contains two things: one list element and a reference to the rest of the
 chain. 
+
+自顶向下设计方法：
+main function to solve the problem
+write auxiliary functions
+
