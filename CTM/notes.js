@@ -178,3 +178,240 @@ a sequence of tokens.
 
 
 Context-free and context-sensitive grammars?
+
+Context-free grammars can be ambiguous, i.e., there can be several parse trees
+that correspond to a given token sequence.
+ A more convenient
+approach is to add extra conditions. These conditions restrict the parser so that
+only one parse tree is possible. We say that they disambiguate the grammar.
+
+ 解决歧义
+ Precedence is a condition on an expression with diﬀerent operators, like
+2*3+4.   Each operator is given a precedence level.   Operators with high
+precedences are put as deep in the parse tree as possible, i.e., as far away
+from the root as possible. If * has higher precedence than +, then the parse
+tree (2*3)+4 is chosen over the alternative 2*(3+4).  If * is deeper in the
+tree than +, then we say that * binds tighter than +.
+
+Associativity is a condition on an expression with the same operator, like
+2-3-4.  In this case, precedence is not enough to disambiguate because all
+operators have the same precedence.  We have to choose between the trees
+(2-3)-4 and 2-(3-4).  Associativity determines whether the leftmost or
+the rightmost operator binds tighter. If the associativity of - is left, then
+the tree (2-3)-4 is chosen. If the associativity of - is right, then the other
+tree 2-(3-4) is chosen.
+
+
+The  semantics  of a  language deﬁnes  what  a  program does  when  it executes.
+
+The kernel language approach
+First, deﬁne a very simple language, called the kernel language.  This lan-
+guage should be easy to reason in and be faithful to the space and time
+eﬃciency of the implementation.  The kernel language and the data struc-
+tures it manipulates together form the kernel computation model.
+
+Second, deﬁne a translation scheme from the full programming language
+to the kernel language. Each grammatical construct in the full language is
+translated into the kernel language. The translation should be as simple as
+possible.  There are two kinds of translation, namely linguistic abstraction
+and syntactic sugar. Both are explained below.
+
+Linguistic abstraction
+Both programming languages and natural languages can evolve to meet their
+needs. When using a programming language, at some point we may feel the need
+to extend the language, i.e., to add a new linguistic construct. For example, the
+declarative model of this chapter has no looping constructs. Section 3.6.3 deﬁnes
+a for  construct  to express  certain  kinds  of loops that are  useful  for writing
+declarative programs. The new construct is both an abstraction and an addition
+to the language syntax.  We therefore call it a linguistic abstraction. A practical
+programming language consists of a set of linguistic abstractions.
+
+
+ Some
+languages leave the order of argument evaluation unspeciﬁed, but assume that a
+function’s arguments are evaluated before the function. Other languages assume
+that an argument is evaluated when and if its result is needed, not before.
+
+Linguistic abstractions are useful for more than just increasing the expressive-
+ness of a program.  They can also improve other properties such as correctness,
+security, and eﬃciency. By hiding the abstraction’s implementation from the pro-
+grammer, the linguistic support makes it impossible to use the abstraction in the
+wrong way. The compiler can use this information to give more eﬃcient code.
+
+The kernel language approach is an example of a translation approach to seman-
+tics, i.e., it is based on a translation from one language to another. 
+The machine approach is intended for the implementor. Programs are trans-
+lated into an idealized machine, which is traditionally called an abstract
+machine or a virtual machine.3   It is relatively easy to translate idealized
+machine code into real machine code.
+解释器
+ An interpreter is a pro-
+gram written in language L1  that accepts programs written in another language
+L2  and executes them. This approach is used by Abelson & Sussman [2]. In their
+case, the interpreter is metacircular, i.e., L1  and L2  are the same language L.
+Adding new language features, e.g., for concurrency and lazy evaluation, gives a
+new language L0  which is implemented by extending the interpreter for L.
+
+The single-assignment store
+A store where all variables are bound to values is called a value store.
+ A value is a mathematical constant.
+
+Variables in the single-assignment store are called declarative variables. 
+Once bound, a declarative variable stays bound throughout the computation
+and is indistinguishable from its value. 
+
+ why
+we are introducing a single-assignment store, when other languages get by with
+a value store or a cell store(可以被修改).
+
+The basic operation on a store is binding a variable to a newly-created value. We
+will write this as xi=value. Here xi  refers directly to a variable in the store (and
+is not the variable’s textual name in a program!) and value refers to a value
+
+The single-assignment operation xi=value constructs value in the store and then
+binds the variable xi  to this value. If the variable is already bound, the operation
+will test whether the two values are compatible.  If they are not compatible, an
+error is signaled
+
+So far, we have looked at a store that contains variables and values, i.e., store
+entities, with which calculations can be done.  It would be nice if we could refer
+to a store entity from outside the store.  This is the role of variable identiﬁers.
+
+A variable identiﬁer is a textual name that refers to a store entity from outside
+the store.   The mapping from variable identiﬁers to store entities is called an
+environment.
+Following
+the links of bound variables to get the value is called dereferencing. It is invisible
+to the programmer.
+兼容
+ We say a set of partial values is compatible if the unbound variables in
+them can be bound in such a way as to make them all equal.   For example,
+person(age:25) and person(age:x) are compatible (because x can be bound
+to 25), but person(age:25) and person(age:26) are not.
+ Dataﬂow variables
+In the declarative model, creating a variable and binding it are done separately.
+What happens if we try to use the variable before it is bound?  We call this a
+variable use error. Some languages create and bind variables in one step, so that
+use errors cannot occur. This is the case for functional programming languages.
+Other languages allow creating and binding to be separate. 
+Declarative variables that cause the program to wait until they are bound are
+called dataﬂow variables. The declarative model uses dataﬂow variables because
+they are tremendously useful in concurrent programming
+i.e., for programs with
+activities that run independently.  If we do two concurrent operations, say A=23
+and B=A+1, then with the fourth solution this will always run correctly and give
+the answer B=24. It doesn’t matter whether A=23 is tried ﬁrst or whether B=A+1
+is tried ﬁrst. With the other solutions, there is no guarantee of this. This property
+of order-independence makes possible the declarative concurrency of Chapter 4.
+It is at the heart of why dataﬂow variables are a good idea.
+
+Kernel language
+
+Values and types
+A type or data type is a set of values together with a set of operations on those
+values. 
+ADT
+programs can deﬁne their own types, which are
+called abstract data types, ADT for short
+
+There are two basic approaches to typing, namely dynamic and static typing. In
+static typing, all variable types are known at compile time.  In dynamic typing,
+the variable type is known only when the variable is bound.   The declarative
+model is dynamically typed. The compiler tries to verify that all operations use
+values of the correct type. But because of dynamic typing, some type checks are
+necessarily left for run time.
+
+An atom is a kind of symbolic constant that can be used as a
+single element in calculations. 
+
+Power of Record
+Records are the basic way to structure data.  They are the building blocks of
+most data structures, including lists, trees, queues, graphs, etc
+
+Procedures are more appropriate than objects because they are simpler. Ob-
+jects are actually quite complicated, as Chapter 7 explains. Procedures are more
+appropriate than functions because they do not necessarily deﬁne entities that
+behave like mathematical functions.6   For example, we deﬁne both components
+and objects as abstractions based on procedures. In addition, procedures are ﬂex-
+ible because they do not make any assumptions about the number of inputs and
+outputs.  A function always has exactly one output.  A procedure can have any
+number of inputs and outputs, including zero. We will see that procedures are ex-
+tremely powerful building blocks, when we talk about higher-order programming
+in Section 3.6.
+
+Kernel language semantics
+
+ The meaning of an identiﬁer like X is determined
+by the innermost local  statement that declares X. 
+
+This scoping rule is
+called lexical scoping or static scoping. 
+
+call by reference
+取过程定义时候的值，而不是执行时候的值
+It has to
+be the value of Y when the procedure is deﬁned. 
+
+local  P  Q  in
+  proc  {Q  X}  {Browse  stat(X)}  end
+  proc  {P  X}  {Q  X}  end
+  local  Q  in
+    proc  {Q  X}  {Browse  dyn(X)}  end
+    {P  hello}
+  end
+end
+
+Static scoping.  A procedure can have external references, which are free
+identiﬁers in the procedure body that are not declared as arguments.  LB
+has one external reference. Max has none. The value of an external reference
+is its value when the procedure is deﬁned.  This is a consequence of static
+scoping.
+
+ Which default is better?
+The correct default is procedure values with static scoping.  This is because a
+procedure that works when it is deﬁned will continue to work, independent of
+the environment where it is called.  This is an important software engineering
+property.
+Dynamic scoping remains useful in some well-deﬁned areas.   For example,
+consider the case of a procedure whose code is transferred across a network from
+one computer to another. Some of this procedure’s external references, for exam-
+ple calls to common library operations, can use dynamic scoping.  This way, the
+procedure will use local code for these operations instead of remote code. This is
+much more eﬃcient.
+
+存在unbound variables时
+ We decide that the program will simply stop its execution, with-
+out signaling any kind of error.  If some other activity (to be determined later)
+binds Y then the stopped execution can continue as if nothing had perturbed the
+normal ﬂow of execution.  This is called dataﬂow behavior.  Dataﬂow behavior
+underlies a second powerful tool presented in this book, namely concurrency. In
+the semantics, we will see that dataﬂow behavior can be implemented in a simple
+way.
+
+
+Bound identiﬁer occurrences and bound variables
+Do  not  confuse  a  bound  identiﬁer  occurrence  with  a
+bound variable!  A bound identiﬁer occurrence does not
+exist at run time; it is a textual variable name that tex-
+tually occurs inside a construct that declares it (e.g., a
+procedure or variable declaration). A bound variable ex-
+ists at run time; it is a dataﬂow variable that is bound
+to a partial value.
+
+local  Arg1  Arg2  in
+  Arg1=111*111
+  Arg2=999*999
+  Res=Arg1+Arg2
+end
+In this statement, all variable identiﬁers are declared with lexical scoping.  The
+identiﬁer occurrences Arg1 and Arg2 are bound and the occurrence Res is free.
+This statement cannot be run. To make it runnable, it has to be part of a bigger
+statement that declares Res.
+
+
+闭包
+The statement hsi can have free variable identiﬁers. Each free identifer is either a
+formal parameter or not. The ﬁrst kind are deﬁned anew each time the procedure
+is called. They form a subset of the formal parameters {hyi1, ..., hyin}. The second
+kind are deﬁned once and for all when the procedure is declared.  We call them
+the external references of the procedure.
