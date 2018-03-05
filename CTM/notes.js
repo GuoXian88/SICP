@@ -174,10 +174,29 @@ kenizer or lexical analyzer.  A program that accepts a sequence of tokens and
 returns a parse tree is called a parser.
 
 A terminal symbol is simply a token. A nonterminal symbol represents
-a sequence of tokens. 
+a sequence of tokens.  The nonterminal is deﬁned by means of a grammar rule,
+which shows how to expand it into tokens.
+<digit>   ::=   0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+<int>   ::=   <digit> { <digit> }
+This rule says that an integer is a digit followed by zero or more digits.  The
+braces “{ ... }” mean to repeat whatever is inside any number of times, including
+zero.
+How to read grammars:
+•  Each terminal symbol encountered is added to the sequence.
+•  For each nonterminal symbol encountered, read its grammar rule and replace the nonterminal by the sequence of tokens that it expands into.
+•  Each time there is a choice (with |), pick any of the alternatives.
+
 
 
 Context-free and context-sensitive grammars?
+a nonterminal, e.g., hdigiti, is always the same no matter where it is used.
+For most practical programming languages, there is usually no context-free
+grammar that generates all legal programs and no others. For example, in many
+languages a variable has to be declared before it is used.  This condition cannot
+be expressed in a context-free grammar because the nonterminal that uses the
+variable must only allow using already-declared variables.  This is a context de-
+pendency.  A grammar that contains a nonterminal whose use depends on the
+context where it is used is called a context-sensitive grammar.
 
 Context-free grammars can be ambiguous, i.e., there can be several parse trees
 that correspond to a given token sequence.
@@ -412,6 +431,51 @@ statement that declares Res.
 闭包
 The statement hsi can have free variable identiﬁers. Each free identifer is either a
 formal parameter or not. The ﬁrst kind are deﬁned anew each time the procedure
-is called. They form a subset of the formal parameters {hyi1, ..., hyin}. The second
+is called. They form a subset of the formal parameters {<y>1, ..., <y>n}. The second
 kind are deﬁned once and for all when the procedure is declared.  We call them
 the external references of the procedure.
+
+Deﬁning practical programming languages
+sequence of characters --> Tokenizer -->sequence of
+tokens --> Parser --> parse tree representing a statement
+
+This section sets the stage for the rest of the book by explaining how we
+will present the syntax (“grammar”) and semantics (“meaning”) of practical pro-
+gramming languages.  With this foundation we will be ready to present the ﬁrst
+computation model of the book, namely the declarative computation model. We
+will continue to use these techniques throughout the book to deﬁne computation
+models.
+
+ Suspendable statements
+ statement执行时，遇到unbound变量会等待unbound变量bind
+ 后再执行
+ 并行编程：
+  A suspended stack ST can become runnable again if another stack
+does an operation that makes ST’s activation condition true. In that chapter we
+shall see that communication from one stack to another through the activation
+condition is the basis of dataﬂow execution. 
+
+
+外部变量引用：
+local  LowerBound  Y  C  in
+  Y=5
+  proc  {LowerBound  X  ?Z}
+    if  X>=Y  then  Z=X  else  Z=Y  end
+  end
+  {LowerBound  3  C}
+end
+
+local  Y  in
+  Y=10
+  {LowerBound  3  C}
+end
+The calling environment has changed slightly: Y refers to a new variable y0, which
+is bound to 10.  When doing the application, the new environment is calculated
+in exactly the same way as before, starting from the contextual environment and
+adding the formal arguments. This means that the y0  is ignored! We get exactly
+the same situation as before in the semantic stack
+The store still has the binding y0 = 10. But y0  is not referenced by the semantic
+stack, so this binding makes no diﬀerence to the execution.
+
+可以理解为定义时的context就确定了吗?
+
