@@ -264,3 +264,21 @@ As a concept, a diﬀerence list lives somewhere between the concept of
 value and the concept of state.  It has the good properties of a value (programs
 using them are declarative), but it also has some of the power of state because it
 can be appended once in constant time.
+
+
+fun  {Flatten  Xs}
+    proc  {FlattenD  Xs  ?Ds}
+        case  Xs
+        of  nil  then  Y  in  Ds=Y#Y
+        []  X|Xr  andthen  {IsList  X}  then  Y1  Y2  Y4  in
+            Ds=Y1#Y4
+            {FlattenD  X  Y1#Y2}
+            {FlattenD  Xr  Y2#Y4}
+        []  X|Xr  then  Y1  Y2  in
+            Ds=(X|Y1)#Y2
+            {FlattenD  Xr  Y1#Y2}
+        end
+    end  Ys
+in
+    {FlattenD  Xs  Ys#nil}  Ys
+end
