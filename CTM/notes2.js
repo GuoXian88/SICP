@@ -467,4 +467,31 @@ fun  {RemoveSmallest  T}
     end
 end
 
+Tree traversal
+Depth-ﬁrst is the simplest traversal. For each node, it visits ﬁrst the left-most
+subtree, then the node itself, and then the right-most subtree. This makes it easy
+to program since it closely follows how nested procedure calls execute. 
 
+proc  {DFS  T}
+    case  T
+    of  leaf  then  skip
+    []  tree(Key  Val  L  R)  then
+        {DFS  L}
+        {Browse  Key#Val}
+        {DFS  R}
+    end
+end
+
+The astute reader will realize that this depth-ﬁrst traversal does not make much
+sense in the declarative model, because it does not calculate any result.
+S1 input state
+Sn output state
+proc  {DFSAcc  T  S1  Sn}
+    case  T
+    of  leaf  then  Sn=S1
+    []  tree(Key  Val  L  R)  then  S2  S3  in
+        {DFSAcc  L  S1  S2}   输入S1 输出S2
+        S3=Key#Val|S2   本身节点加上左边树的输出 一起输入到右边树
+        {DFSAcc  R  S3  Sn} 最后得到输出Sn
+    end
+end
