@@ -486,6 +486,7 @@ The astute reader will realize that this depth-ﬁrst traversal does not make mu
 sense in the declarative model, because it does not calculate any result.
 S1 input state
 Sn output state
+最简单的就是 左 自身节点 右
 proc  {DFSAcc  T  S1  Sn}
     case  T
     of  leaf  then  Sn=S1
