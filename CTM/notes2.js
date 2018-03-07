@@ -318,3 +318,153 @@ proc  {ButLast  L  ?X  ?L1}
         {ButLast  L2  X  L3}
     end
 end
+
+Amortized constant-time ephemeral queue
+
+This uses the pair q(F  R) to represent the queue. F and R are lists. F represents
+the front of the queue and R represents the back of the queue in reversed form.
+
+fun  {NewQueue}  q(nil  nil)  end
+fun  {Check  Q}
+    case  Q  of  q(nil  R)  then  q({Reverse  R}  nil)  else  Q  end
+end
+fun  {Insert  Q  X}
+    case  Q  of  q(F  R)  then  {Check  q(F  X|R)}  end
+end
+fun  {Delete  Q  X}
+    case  Q  of  q(F  R)  then  F1  in  F=X|F1  {Check  q(F1  R)}  end
+end
+fun  {IsEmpty  Q}
+    case  Q  of  q(F  R)  then  F==nil  end
+end
+
+At any instant, the queue content is given by {Append  F  {Reverse  R}}.  An
+element can be inserted by adding it to the front of R and deleted by removing it
+from the front of F.
+中间有个reverse
+ For example, say that F=[a  b] and R=[d  c]. Deleting the
+ﬁrst element returns a and makes F=[b]. Inserting the element e makes R=[e  d  c]. Both operations are constant-time.
+
+
+To make this representation work, each element in R has to be moved to F
+sooner or later(???????). When should the move be done? Doing it element by element is
+ineﬃcient, since it means replacing F by {Append  F  {Reverse  R}} each time,
+which takes time at least proportional to the length of F. The trick is to do it only
+occasionally.  We do it when F becomes empty, so that F is non-nil if and only
+if the queue is non-empty.  This invariant is maintained by the Check function,
+which moves the content of R to F whenever F is nil.
+The Check function does a list reverse operation on R. The reverse takes time
+proportional to the length of R, i.e., to the number of elements it reverses. Each
+element that goes through the queue is passed exactly once from R to F. Allocating
+the reverse’s execution time to each element therefore gives a constant time per
+element. This is why the queue is amortized.
+
+fun  {NewQueue}  X  in  q(0  X  X)  end
+fun  {Insert  Q  X}
+case  Q  of  q(N  S  E)  then  E1  in  E=X|E1  q(N+1  S  E1)  end
+end
+fun  {Delete  Q  X}
+case  Q  of  q(N  S  E)  then  S1  in  S=X|S1  q(N-1  S1  E)  end
+end
+fun  {IsEmpty  Q}
+case  Q  of  q(N  S  E)  then  N==0  end
+end
+This uses the triple q(N  S  E) to represent the queue. At any instant, the queue
+content is given by the diﬀerence list S#E. N is the number of elements in the
+queue.  Why is N needed?  Without it, we would not know how many elements
+were in the queue.
+
+
+persist queue(jump)
+
+Tree
+ A tree is either a leaf node or a node that contains one or more trees. Nodes can carry additional
+information.
+ A list always has an
+element followed by exactly one smaller list.  A tree has an element followed by
+some number of smaller trees.
+ In a balanced tree, all subtrees of the same node have the same size
+(i.e., the same number of nodes) or approximately the same size.
+Ordered binary tree
+Each non-leaf node includes the values hOValuei and hValuei.   The ﬁrst value
+hOValuei is any subtype of hValuei that is totally ordered, i.e., it has boolean
+comparison functions.   For example,  hInti (the integer type) is one possibility.
+The second value hValuei is carried along for the ride. No particular condition is
+imposed on it.
+Let us call the ordered value the key and the second value the information.
+Then a binary tree is ordered if for each non-leaf node, all the keys in the ﬁrst
+subtree are less than the node key, and all the keys in the second subtree are
+greater than the node key.
+
+<OBTree>   ::=   leaf
+|   tree(<OValue> <Value> <OBTree>1  <OBTree>2)
+查看信息
+ With the orderedness condition, the search algorithm can
+eliminate half the remaining nodes at each step. This is called binary search. The
+number of operations it needs is proportional to the depth of the tree, i.e., the
+length of the longest path from the root to a leaf. The look up：
+fun  {Lookup  X  T}
+    case  T
+    of  leaf  then  notfound
+    []  tree(Y  V  T1  T2)  then
+        if  X<Y  then  {Lookup  X  T1}
+        elseif  X>Y  then  {Lookup  X  T2}
+        else  found(V)  end
+    end
+end
+
+more readable version:
+
+fun  {Lookup  X  T}
+    case  T
+    of  leaf  then  notfound
+        []  tree(Y  V  T1  T2)  andthen  X==Y  then  found(V)
+        []  tree(Y  V  T1  T2)  andthen  X<Y  then  {Lookup  X  T1}
+        []  tree(Y  V  T1  T2)  andthen  X>Y  then  {Lookup  X  T2}
+    end
+end
+
+
+ In
+more complicated tree algorithms, pattern matching with andthen is a deﬁnite
+advantage over explicit if statements.
+
+
+fun  {Insert  X  V  T}
+    case  T
+    of  leaf  then  tree(X  V  leaf  leaf)
+    []  tree(Y  W  T1  T2)  andthen  X==Y  then
+    []  tree(Y  W  T1  T2)  andthen  X<Y  then
+    tree(Y  W  {Insert  X  V  T1}  T2)
+    []  tree(Y  W  T1  T2)  andthen  X>Y  then
+    tree(Y  W  T1  {Insert  X  V  T2})
+    end
+end
+
+fun  {Delete  X  T}
+    case  T
+    of  leaf  then  leaf
+    []  tree(Y  W  T1  T2)  andthen  X==Y  then
+        case  {RemoveSmallest  T2}
+        of  none  then  T1
+        []  Yp#Vp#Tp  then  tree(Yp  Vp  T1  Tp)
+        end
+    []  tree(Y  W  T1  T2)  andthen  X<Y  then
+    tree(Y  W  {Delete  X  T1}  T2)
+    []  tree(Y  W  T1  T2)  andthen  X>Y  then
+    tree(Y  W  T1  {Delete  X  T2})
+    end
+end
+
+fun  {RemoveSmallest  T}
+    case  T
+    of  leaf  then  none
+    []  tree(Y  V  T1  T2)  then
+        case  {RemoveSmallest  T1}
+        of  none  then  Y#V#T2
+        []  Yp#Vp#Tp  then  Yp#Vp#tree(Y  V  Tp  T2)
+        end
+    end
+end
+
+
