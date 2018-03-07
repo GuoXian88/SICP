@@ -282,3 +282,39 @@ fun  {Flatten  Xs}
 in
     {FlattenD  Xs  Ys#nil}  Ys
 end
+
+This program is eﬃcient:  it does a single cons operation for each non-list in the
+input. We convert the diﬀerence list returned by FlattenD into a regular list by
+binding its second argument to nil. We write FlattenD as a procedure because
+its output is part of its last argument, not the whole argument
+
+?????
+Reverse of X|Xs is Y1#Y, where
+reverse of Xs is Y1#Y2 and
+equate Y2 and X|Y.
+这里的X|Y要反一下顺序
+Look carefully and you will see that this is almost exactly the same iterative
+solution as in the last section.  The only diﬀerence between IterReverse and
+ReverseD  is the argument  order:  the output of IterReverse is the second
+argument of ReverseD. So what’s the advantage of using diﬀerence lists?  With
+them, we derived ReverseD without thinking, whereas to derive IterReverse
+we had to guess an intermediate state that could be updated.
+
+
+Queues
+ A queue is a sequence of elements
+with an insert and a delete operation. 
+ The insert operation adds an element to
+one end of the queue and the delete operation removes an element from the other
+end. 
+FIFO
+
+
+proc  {ButLast  L  ?X  ?L1}
+    case  L
+    of  [Y]  then  X=Y  L1=nil
+    []  Y|L2  then  L3  in
+        L1=Y|L3
+        {ButLast  L2  X  L3}
+    end
+end
