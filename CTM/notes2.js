@@ -496,3 +496,49 @@ proc  {DFSAcc  T  S1  Sn}
         {DFSAcc  R  S3  Sn} 最后得到输出Sn
     end
 end
+
+Breadth-ﬁrst is a second basic traversal.  It ﬁrst traverses all nodes at depth 0,
+then all nodes at depth 1, and so forth, going one level deeper at a time.
+At each
+level, it traverses the nodes from left to right. The depth of a node is the length
+of the path from the root to the current node, not including the current node.  To
+implement breadth-ﬁrst traversal, we need a queue to keep track of all the nodes
+at a given depth.
+
+proc  {BFS  T}
+    fun  {TreeInsert  Q  T}
+        if  T\=leaf  then  {Insert  Q  T}  else  Q  end
+    end
+    proc  {BFSQueue  Q1}
+        if  {IsEmpty  Q1}  then  skip
+        else
+            X  Q2={Delete  Q1  X}
+            tree(Key  Val  L  R)=X
+        in
+            {Browse  Key#Val}
+            {BFSQueue  {TreeInsert  {TreeInsert  Q2  L}  R}}
+        end
+    end
+in
+    {BFSQueue  {TreeInsert  {NewQueue}  T}}
+end
+
+Depth-ﬁrst traversal with explicit stack：
+
+proc  {DFS  T}
+fun  {TreeInsert  S  T}
+if  T\=leaf  then  T|S  else  S  end
+end
+proc  {DFSStack  S1}
+case  S1
+of  nil  then  skip
+[]  X|S2  then
+tree(Key  Val  L  R)=X
+in
+{Browse  Key#Val}
+{DFSStack  {TreeInsert  {TreeInsert  S2  R}  L}}
+end
+end
+in
+{DFSStack  {TreeInsert  nil  T}}
+end
