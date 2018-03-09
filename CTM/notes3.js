@@ -217,5 +217,187 @@ fun  {Pop  S  E}  case  S  of  stack(X  S1)  then  E=X  S1  end  end
 fun  {IsEmpty  S}  S==stackEmpty  end
 
 A declarative dictionary
+Tree-based implementation
+A more eﬃcient implementation of dictionaries is possible by using an ordered
+binary tree,  as deﬁned in Section 3.4.6.   Put  is simply Insert and CondGet
+is very similar to Lookup. 
+
+fun  {NewDictionary}  leaf  end
+fun  {Put  Ds  Key  Value}
+    %  ...  similar  to  Insert
+end
+fun  {CondGet  Ds  Key  Default}
+    %  ...  similar  to  Lookup
+end
+fun  {Domain  Ds}
+    proc  {DomainD  Ds  ?S1  Sn}
+        case  Ds
+        of  leaf  then
+            S1=Sn
+        []  tree(K  _  L  R)  then  S2  S3  in
+            {DomainD  L  S1  S2}
+            S2=K|S3
+            {DomainD  R  S3  Sn}
+        end
+    end  D
+in
+    {DomainD  Ds  D  nil}  D
+end
+
+We can do even better than the tree-based implementation by leaving the declara-
+tive model behind and using explicit state (see Section 6.5.1). This gives a stateful
+dictionary, which is a slightly diﬀerent type than the declarative dictionary. But
+it gives the same functionality.  Using state is an advantage because it reduces
+the execution time of Put and CondGet operations to amortized constant time.
+
+
+A word frequency application
+function WordFreq, which is given a list of characters Cs and returns a list of
+pairs W#N, where W is a word (a maximal sequence of letters and digits) and N is
+the number of times the word occurs in Cs. 
+ {WordChar  C} returns true if C is a letter or digit.
+{WordToAtom  PW} converts a reversed list of word characters into an atom
+containing those characters. The function StringToAtom is used to create
+the atom.
+括起来的直接是返回值了
+&是取ascii码?
+a-z, A-Z, 0-9
+
+fun  {WordChar  C}
+    (&a=<C  andthen  C=<&z)  orelse
+    (&A=<C  andthen  C=<&Z)  orelse  (&0=<C  andthen  C=<&9)
+end
+
+StringToAtom是内置方法?啥是Atom?
+
+fun  {WordToAtom  PW}
+    {StringToAtom  {Reverse  PW}}
+end
+
+用Dict D来统计W
+
+fun  {IncWord  D  W}
+    {Put  D  W  {CondGet  D  W  0}+1}
+end
+
+将string Cs里面的word提取出来组成一个list PW
+
+fun  {CharsToWords  PW  Cs}
+    % 终极终止条件
+    case  Cs
+    of  nil  andthen  PW==nil  then
+        nil
+    % 终极终止条件
+    []  nil  then
+        [{WordToAtom  PW}]
+    % 收集一个word的char
+    []  C|Cr  andthen  {WordChar  C}  then
+        {CharsToWords  {Char.toLower  C}|PW  Cr}
+    % 不是字母或者数字则跳回
+    []  C|Cr  andthen  PW==nil  then
+        {CharsToWords  nil  Cr}
+    % 收集到一个word, PW重新开始
+    []  C|Cr  then
+        {WordToAtom  PW}|{CharsToWords  nil  Cr}
+    end
+end
+
+list Ws迭代计算其在D中的计数
+
+fun  {CountWords  D  Ws}
+    case  Ws
+    of  W|Wr  then  {CountWords  {IncWord  D  W}  Wr}
+    []  nil  then  D
+    end
+end
+
+fun  {WordFreq  Cs}
+    {CountWords  {NewDictionary}  {CharsToWords  nil  Cs}}
+end
+
+
+ Secure abstract data types
+
+In both the stack and dictionary data types, the internal representation of values
+is visible to users of the type. If the users are disciplined programmers then this
+might not be a problem. But this is not always the case. A user can be tempted
+to look at a representation or even to construct new values of the representation.
+For example, a user of the stack type can use Length to see how many ele-
+ments are on the stack, if the stack is implemented as a list. The temptation to
+do this can be very strong if there is no other way to ﬁnd out what the size of the
+stack is.  Another temptation is to ﬁddle with the stack contents.  Since any list
+is also a legal stack value, the user can build new stack values, e.g., by removing
+or adding elements.
+In short, any user can add new stack operations anywhere in the program.
+This means that the stack’s implementation is potentially spread out over the
+whole program instead of being limited to a small part. This is a disastrous state
+of aﬀairs, for two reasons:
+•  The program is much harder to maintain.  For example, say we want to
+improve the eﬃciency of a dictionary by replacing the list-based implemen-
+tation by a tree-based implementation. We would have to scour the whole
+program to ﬁnd out which parts depend on the list-based implementation.
+There is also a problem of error conﬁnement:  if the program has bugs in
+one part then this can spill over into the abstract data types, making them
+buggy as well, which then contaminates other parts of the program.
+•  The program is susceptible to malicious interference. This is a more subtle
+problem that has to do with security. It does not occur with programs writ-
+ten by people who trust each other.  It occurs rather with open programs.
+An open program is one that can interact with other programs that are only
+known at run-time.  What if the other program is malicious and wants to
+disrupt the execution of the open program? Because of the evolution of the
+Internet, the proportion of open programs is increasing.
+
+ The value to be protected is put inside a protection boundary.
+There are two ways to use this boundary:
+•  Stationary value.  The value never leaves the boundary.  A well-deﬁned set
+of operations can enter the boundary to calculate with the value. The result
+of the calculation stays inside the boundary.
+•  Mobile value.  The value can leave and reenter the boundary.  When it is
+outside, operations can be done on it. Operations with proper authorization
+can take the value out of the boundary and calculate with it. The result is
+put back inside the boundary.
+
+In the next section we build a secure ADT using the second solution.  This
+way is the easiest to understand for the declarative model. The authorization we
+need to enter the protection boundary is a kind of “key”.  We add it as a new
+concept to the declarative model, called name. Section 3.7.7 then explains that a
+key is an example of a very general security idea, called a capability. In Chapter 6,
+Section 6.4 completes the story on secure ADTs by showing how to implement
+the ﬁrst solution and by explaining the eﬀect of explicit state on security.
+
+ The declarative model with secure types
+ We implement this with a new basic type called a name. A name is a constant
+like an atom except that it has a much more restricted set of operations.   In
+particular, names do not have a textual representation:  they cannot be printed
+or typed in at the keyboard.   Unlike  for atoms,  it is not possible  to convert
+between names and strings. The only way to know a name is by being passed a
+reference to it within a program. The name type comes with just two operations:
+{NewName}    Return a fresh name
+N1==N2          Compare names N1 and N2
+A fresh name is one that is guaranteed to be diﬀerent from all other names in the
+system. Alert readers will notice that NewName is not declarative because calling
+it twice returns diﬀerent results. In fact, the creation of fresh names is a stateful
+operation.  The guarantee of uniqueness means that NewName has some internal
+memory.  However, if we use NewName just for making declarative ADTs secure
+then this is not a problem. The resulting secure ADT is still declarative.
+
+Key={NewName}
+SS=fun  {$  K}  if  K==Key  then  S  end  end
+This ﬁrst creates a new name in Key. Then it makes a function that can return
+S, but only if the correct argument is given. We say that this “wraps” the value
+S inside SS. If one knows Key, then accessing S from SS is easy:
+S={SS  Key}
+
+proc  {NewWrapper  ?Wrap  ?Unwrap}
+    Key={NewName}
+in
+    fun  {Wrap  X}
+        fun  {$  K}  if  K==Key  then  X  end  end
+    end
+    fun  {Unwrap  W}
+        {W  Key}
+    end
+end
+
 
 */
