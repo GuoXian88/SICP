@@ -249,10 +249,35 @@ into account.
 Memory management
 Memory management is extended to the multiset as follows:
 •  A terminated semantic stack can be deallocated.
-•  A blocked semantic stack can be reclaimed if its activation condition de-
-pends on an unreachable variable.  In that case, the semantic stack would
-never become runnable again, so removing it changes nothing during the
-execution.
+•  A blocked semantic stack can be reclaimed if its activation condition depends on an unreachable variable.  In that case, the semantic stack would never become runnable again, so removing it changes nothing during the execution.
+
+
+
+CH4 Declarative Concurrency
+Concurrency also lets a program be organized into parts that
+execute independently and interact only when needed, i.e., client/server and pro-
+ducer/consumer programs. This is an important software engineering property.
+It is based on the fact that a dataﬂow variable can
+be bound to only one value. This gives the following two consequences:
+1.What stays the same: The result of a program is the same whether or not it
+is concurrent. Putting any part of the program in a thread does not change
+the result.
+2.What is new:  The result of a program can be calculated incrementally.  If
+the input to a concurrent program is given incrementally, then the program
+will calculate its output incrementally as well.
+
+thread  Xs={Gen  1  10}  end
+thread  Ys={Map  Xs  fun  {$  X}  X*X  end}  end
+{Browse  Ys}
+Whenever
+Gen adds an element to its list, Map will immediately calculate its square.
+
+data-driven concurrency
+Lazy execution.  This part explains the second form of declarative con-
+currency, namely demand-driven concurrency, also known as lazy execution.eg:
+lazy streams and list comprehensions.
+
+
 
 
  */
