@@ -277,7 +277,112 @@ Lazy execution.  This part explains the second form of declarative con-
 currency, namely demand-driven concurrency, also known as lazy execution.eg:
 lazy streams and list comprehensions.
 
+declarative concurrency Model:
+Multiple semantic stacks
+Single-assignment store
+
+Interleaving
+each computation step is atomic
+This makes reasoning about
+programs easier.
+ If the system is implemented on a single
+processor, then the implementation could also do interleaving.  However,
+the system might be implemented on multiple processors, so that threads
+can do several computation steps simultaneously.  This takes advantage of
+parallelism to improve performance.
+
+ In a concurrent program, all computation steps of a given
+thread are totally ordered. 
+
+We say the system is fair if it does not let any ready thread “starve”, i.e.,
+all ready threads will eventually execute. This is an important property to make
+program behavior predictable and to simplify reasoning about programs.
 
 
+fun  {Double  Xs}
+    case  Xs  of  X|Xr  then  2*X|{Double  Xr}  end
+end
 
+Ys={Double  Xs}
+The output stream Ys contains the elements of the input stream Xs multiplied
+by 2.  As long as Xs grows, then Ys grows too. 
+The program never terminates.
+However,  if the input stream stops growing, then the program will eventually
+stop executing too. This is an important insight. We say that the program does
+a partial termination. It has not terminated completely yet, since further binding
+the inputs would cause it to execute further (up to the next partial termination!).
+But if the inputs do not change then the program will execute no further.
+
+
+But in what sense are the outputs “functions” of the inputs? Both inputs
+and outputs can contain unbound variables! For example, if Xs=1|2|3|Xr then
+the Ys={Double  Xs} call returns Ys=2|4|6|Yr, where Xr and Yr are unbound
+variables. What does it mean that Ys is a function of Xs?
+
+A set of store bindings, like each
+of the four cases given above, is called a constraint.   For each variable x and
+constraint c, we deﬁne values(x, c) to be the set of all possible values x can have,
+given that c holds. Then we deﬁne:
+Two constraints c1  and c2  are logically equivalent if:  (1) they con-
+tain the same variables, and (2) for each variable x, values(x, c1) =
+values(x, c2).
+For example, the constraint x = foo(y w) ∧ y = z (where x, y, z, and w are
+store variables) is logically equivalent to the constraint x = foo(z w) ∧ y = z.
+This is because y = z forces y and z to have the same set of possible values, so
+that foo(y w) deﬁnes the same set of values as foo(z w).  Note that variables
+in an equivalence set (like {y, z}) always have the same set of possible values.
+
+A concurrent program is declarative if the following holds for all pos-
+sible inputs.  All executions with a given set of inputs have one of
+two results:  (1) they all do not terminate or (2) they all eventually
+reach partial termination and give results that are logically equiva-
+lent.  (Diﬀerent executions may introduce new variables; we assume
+that the new variables in corresponding positions are equal.)
+
+ Thread execution is implemented with preemptive
+scheduling. That is, if more than one thread is ready to execute, then each thread
+will get processor time in discrete intervals called time slices.  It is not possible
+for one thread to take over all the processor time.
+
+Let us see what we can do by adding threads to simple programs. It is important
+to remember that each thread is a dataﬂow thread, i.e., it suspends on availability
+of data.
+
+If we enter the following statements
+(without a declare!):
+Xs=1|2|Ys
+fun  {F  X}  X*X  end
+then the main thread will traverse the list, creating two threads for the ﬁrst two
+arguments of the list, thread  {F  1}  end and thread  {F  2}  end, and then it
+will suspend again on the tail of the list Y. Finally, doing
+Ys=3|Zs
+Zs=nil
+will create a third thread with thread  {F  3}  end and terminate the computa-
+tion of the main thread.  The three threads will also terminate, resulting in the
+ﬁnal list [1  4  9].  Remark that the result is the same as the sequential map
+function, only it can be obtained incrementally if the input is given incremental-
+ly.  The sequential map function executes as a “batch”: the calculation gives no
+result until the complete input is given, and then it gives the complete result.
+
+
+fun  {Fib  X}
+    if  X=<2  then  1
+    else  thread  {Fib  X-1}  end  +  {Fib  X-2}  end
+end
+you should not hesitate
+to create a thread if it improves program structure
+
+ Thread scheduling
+ The scheduler puts all ready threads in a queue.  At each step, it takes the ﬁrst
+thread out of the queue, lets it execute some number of steps, and then puts
+it back in the queue.  This is called round-robin scheduling.  It guarantees that
+processor time is spread out equitably over the ready threads.
+The counting approach has the advantage that scheduler execution is de-
+terministic, i.e., running the same program twice will preempt threads at
+exactly the same instants. A deterministic scheduler is often used for hard
+real-time applications, where guarantees must be given on timings.
+•  The timer approach is more eﬃcient, because the timer is supported by
+hardware.  However, the scheduler is no longer deterministic.  Any event
+in the operating system, e.g., a disk or network operation, will change the
+exact instants when preemption occurs.
  */
