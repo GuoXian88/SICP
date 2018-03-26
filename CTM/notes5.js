@@ -176,10 +176,17 @@ thread
 end
 
 
- Using the declarative concurrent model di-
-rectly
+Using the declarative concurrent model directly
 Order-determining concurrency
+use dataﬂow concurrency to ﬁnd the order automatically.
 
+Coroutines
+A coroutine is called explicitly like a procedure, but each coroutine has its has its own locus of control,like a thread.
+Coroutines have two operations, Spawn and Resume.
+The {Resume  CId} operation
+transfers control from the current coroutine to the coroutine with identity CId.
+
+Concurrent composition
 
 
  */
