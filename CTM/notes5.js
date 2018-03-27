@@ -188,5 +188,39 @@ transfers control from the current coroutine to the coroutine with identity CId.
 
 Concurrent composition
 
+In lazy evaluation, a statement is only executed when its result is needed somewhere else in the program. 
+ Lazy functions are not executed when they are
+called.  They do not block either.  What happens is that they create “stopped
+executions” that will be continued only when their results are needed.
+The importance of lazy evaluation
+Lazy evaluation is a powerful concept that can simplify many programming tasks.
+Lazy evaluation has a role both for programming in the large (for modulariza-
+tion and resource management) and for programming in the small (for algorithm
+design). For programming in the small, it can help in the design of declarative al-
+gorithms that have good amortized or worst-case time bounds. 
+ For programming in the large, it can help mod-
+ularize programs.
+
+ The demand-driven concurrent model
+The demand-driven concurrent model extends the data-driven concurrent model
+with just one new concept,  the by-need trigger. 
+We ﬁnd that often the best way to structure an application is to build it in data-driven fashion around a demand-driven core.
+
+To do demand-driven concurrency, we add one instruction, ByNeed, to the ker-
+nel language (see Table 4.2).  Its operation is extremely simple.  The statement
+{ByNeed  P  Y} has the same eﬀect as the statement thread  {X  Y}  end. Both
+statements call the procedure P in its own thread with argument Y. The diﬀerence
+between the statements is when the procedure call is executed.  For thread  {P
+Y}  end, we know that {P  Y} will always be executed eventually.  For {ByNeed
+P  Y}, we know that {P  Y} will be executed only if the value of Y is needed. 
+{ByNeed  proc  {$  A}  A=111*111  end  Y}
+{Browse  Y}
+This displays Y without calculating its value, since the browser does not need the
+value of Y. Invoking an operation that needs the value of Y, for example, Z=Y+1
+or {Wait  Y}, will trigger the calculation of Y. This causes 12321 to be displayed.
+
+In general, a trigger is a pair consisting of an activation
+condition, which is a boolean expression, and an action, which is a procedure. For a by-need trigger, the
+activation condition is the need for the value of a variable.
 
  */
