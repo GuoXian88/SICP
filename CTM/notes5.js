@@ -201,7 +201,7 @@ gorithms that have good amortized or worst-case time bounds.
  For programming in the large, it can help mod-
 ularize programs.
 
- The demand-driven concurrent model
+The demand-driven concurrent model
 The demand-driven concurrent model extends the data-driven concurrent model
 with just one new concept,  the by-need trigger. 
 We ﬁnd that often the best way to structure an application is to build it in data-driven fashion around a demand-driven core.
@@ -220,7 +220,70 @@ value of Y. Invoking an operation that needs the value of Y, for example, Z=Y+1
 or {Wait  Y}, will trigger the calculation of Y. This causes 12321 to be displayed.
 
 In general, a trigger is a pair consisting of an activation
-condition, which is a boolean expression, and an action, which is a procedure. For a by-need trigger, the
-activation condition is the need for the value of a variable.
+condition, which is a boolean expression, and an action, which is a procedure. For a by-need trigger, the activation condition is the need for the value of a variable.
 
+
+What does it mean for a variable to be needed? The deﬁnition of need is carefully
+designed so that lazy execution is declarative, i.e., all executions lead to logically-
+equivalent stores.  A variable is needed by a suspended operation if the variable
+must be determined for the operation to continue.
+There is a second way a variable can be needed.  A variable is needed if it
+is determined.  If this were not true, then the demand-driven concurrent model
+would not be declarative. 
+By-need triggers can be used to implement other concepts that have some “lazy”
+or “demand-driven” behavior. 
+ For example,  they underlie lazy functions and
+dynamic linking.
+Implementing dynamic linking with by-need 
+ Brieﬂy, an application’s source code
+consists of a set of component speciﬁcations, called functors. A running applica-
+tion consists of instantiated components, called modules. A module is represented
+by a record that groups together the module’s operations. Each record ﬁeld ref-
+erences one operation.  Components are linked when they are needed, i.e., their
+functors are loaded into memory and instantiated. As long as the module is not
+needed, then the component is not linked.  When a program attempts to access
+a module ﬁeld, then the component is needed and by-need execution is used to
+link the component.
+ Declarative computation models
+ Since laziness and dataﬂow variables are independent concepts, this means
+there are three special moments in a variable’s lifetime:
+1.  Creation of the variable as an entity in the language, such that it can be
+placed inside data structures and passed to or from a function or proce-
+dure. The variable is not yet bound to its value. We call such a variable a
+“dataﬂow variable”.
+2.  Speciﬁcation of the function or procedure call that will evaluate the value
+of the variable (but the evaluation is not done yet).
+3.  Evaluation of the function. When the result is available, it is bound to the
+variable.  The evaluation might be done according to a trigger, which may
+be implicit such as a “need” for the value.  Lazy execution uses implicit
+need.
+declare  fun  lazy  {LazyMul  A  B}  A*B  end
+declare  X={LazyMul  11  11}      %  (1)+(2)  together
+{Wait  X} %  (3)  separate
+One way to understand the added expressiveness is to realize that dataﬂow
+variables and laziness each add a weak form of state to the model. In both cases,
+restrictions on using the state ensure the model is still declarative.
+Why laziness with dataﬂow must be concurrent
+防止deadlock
+
+local
+    Z
+    fun  lazy  {F1  X} X+Z  end
+    fun  lazy  {F2  Y}  Z=1  Y+Z  end
+in
+    {Browse  {F1  1}+{F2  2}}
+end
+ Lazy streams
+ On the other hand, lazy execution may use many
+more total resources, because of the cost of its implementation.  The need for
+laziness must take both of these factors into account.
+Lazy execution can be implemented in two ways in the declarative concurrent
+model:  with programmed triggers or with internal triggers.  
+ Bounded buﬀer
+ Reading a ﬁle lazily
+The Hamming problem
+
+ Lazy list operations
+
+ 
  */
