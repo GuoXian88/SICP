@@ -1,4 +1,4 @@
-
+;(load "e:\\test.scm")
 ;ch1 sicp text book notes
 (define (square x)
     (* x x))
@@ -94,6 +94,9 @@
 (define (even? n)
   (= (remainder n 2) 0))
 
+(define (odd? n)
+  (not (= (remainder n 2) 0)))
+
  (define (fast-expt b n)
     (cond ((= n 0) 1)
         ((even? n) (square (fast-expt b (/ n 2))))
@@ -150,5 +153,12 @@
         (else false)
     )
 )
+
+
+;1.2.6  Example: Testing for Primality
+
+
+;1.3 高阶函数
+;One of the things we should demand from a powerful programming language is the ability to build abstractions by assigning names to common patterns and then to work in terms of the abstractions directly. 
 
 
