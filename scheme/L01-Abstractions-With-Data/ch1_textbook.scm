@@ -1,4 +1,4 @@
-
+;(load "e:\\test.scm")
 ;ch1 sicp text book notes
 (define (square x)
     (* x x))
@@ -93,6 +93,9 @@
 
 (define (even? n)
   (= (remainder n 2) 0))
+
+(define (odd? n)
+  (not (= (remainder n 2) 0)))
 
  (define (fast-expt b n)
     (cond ((= n 0) 1)
