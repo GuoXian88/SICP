@@ -157,3 +157,8 @@
 
 ;1.2.6  Example: Testing for Primality
 
+
+;1.3 高阶函数
+;One of the things we should demand from a powerful programming language is the ability to build abstractions by assigning names to common patterns and then to work in terms of the abstractions directly. 
+
+
