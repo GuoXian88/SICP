@@ -161,4 +161,65 @@
 ;1.3 高阶函数
 ;One of the things we should demand from a powerful programming language is the ability to build abstractions by assigning names to common patterns and then to work in terms of the abstractions directly. 
 
+;求a到b间的和，step是next a过程，值是term a过程
+(define (sum term a next b)
+    (if (> a b)
+        0
+        (+ (term a)
+            (sum term (next a) next b)
+        )
+    )
+)
+
+(define (cube x) (* x x x))
+
+(define (inc n) (+ n 1))
+
+
+;求a,b间的定积分
+(define (integral f a b dx)
+    (define (add-dx x) (+ x dx))
+    (* (sum f (+ a (/ dx 2.0)) add-dx b)
+        dx
+    )
+)
+
+;lambda 没有与环境中的名字关联
+(lambda (x) (/ 1.0 (* x (+ x 2))))
+
+; let 
+(define (f x y)
+    (let (
+        (a (+ 1 (* x y)))
+        (b (- 1 y))
+    )
+        (+ (* x (square a))
+            (* y b)
+            (* a b)
+        )
+    )
+)
+
+
+;lambda and let
+;作用域是body
+((lambda (p1 p2 p3)
+    ;body
+) exp1 exp2 exp3)
+
+;变量值在let外计算
+; x值为2
+(let (
+        (x 3)
+        (y (+ x 2)) ;y的值为4而不是2,这个计算是在外面eval的
+    )
+    (* x y)
+)
+
+
+
+
+
+
+
 
