@@ -217,6 +217,98 @@
 )
 
 
+;不动点
+
+(define (search f neg-point pos-point)
+    (let (
+            (mid-point (average neg-point pos-point))
+        )
+
+        (if (close-enough? neg-point pos-point)
+            mid-point
+            (let ((test-value (f mid-point)))
+                (cond ((positive? test-value)
+                        (search f neg-point mid-point)
+                    )
+                    ((negative? test-value)
+                        (search f mid-point pos-point)
+                    )
+                    (else mid-point)
+                
+                )
+            )
+        )
+    )
+)
+
+
+(define (close-enough? x y)
+    (< (abs x y) 0.001)
+)
+
+;完善考虑同号的情况
+
+(define (half-interval-method f a b)
+    (let ((a-value) (f a)
+            (b-value) (f b)
+        )
+        (cond ((and (negative? a-value) (positive? b-value))
+            (search f a b)
+            )
+            ((and (negative? b-value) (positive? a-value))
+            (search f b a)
+            )
+            (else (error "Values are not of oppositive sign" a b))
+        )
+    )
+)
+
+;不动点
+
+(define tolerance 0.00001)
+
+(define (fixed-point f first-guess)
+    (define (close-enough? v1 v2)
+        (< (abs v1 v2) tolerance)
+    )
+
+    (define (try guess)
+        (let ((next (f guess)))
+            (if (close-enough? next guess)
+                next
+                (try next)
+            )
+        )
+    )
+
+    (try first-guess)
+)
+
+;Newton's method
+
+(define dx 0.00001)
+(define (deriv g)
+    (lambda (x)
+        (/ (- (g (+ x dx)) (g x)) dx)
+    )
+)
+
+(define (newton-transform g)
+    (lambda (x)
+        (- x (/ (g x) ((deriv g) x)))
+    )
+)
+
+(define (newtons-method g guess)
+    (fixed-point (newton-transform g) guess)
+)
+
+
+
+
+
+
+
 
 
 
