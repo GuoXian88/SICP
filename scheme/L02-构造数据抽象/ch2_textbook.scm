@@ -69,6 +69,68 @@
     )
 )
 
+;闭包性质：如cons,通过cons组合出来的数据对象本身也可以通过同样的操作再进行组合
+;这样就能构建层次性的结构了
+
+
+;list 表结构数据
+
+(cons 1
+    (cons 2
+        (cons 3
+            (cons 4 nil)))
+)
+
+(define (list-ref items n)
+    (if (= n 0)
+        (car items)
+        (list-ref (cdr items) (- n 1))
+    )
+)
+
+(define (length items)
+    (if(null? items)
+        0
+        (+ 1 (length (cdr items)))
+    )
+)
+
+(define (append list1 list2)
+    (if (null? list1)
+        list2
+        (cons (car list1) (append (cdr list1) list2))
+    )
+)
+
+;map 将如何提取表的中元素和组合结果的细节隔离开
+
+
+(define (map proc items)
+    (if(null? items)
+        nil
+        (cons (proc (car items))
+            (map proc (cdr items))
+        )
+    )
+)
+
+;表--> tree形表示 
+
+
+(define (count-leaves x)
+    (cond ((null? x) 0)
+        ((not (pair? x)) 1)
+        (else (+ (count-leaves (car x))
+                (count-leaves (cdr x))
+        )
+    )
+)
+
+
+
+
+
+
 
 
 
