@@ -519,3 +519,151 @@
 )
 
 
+;集合与信息检索
+
+;Huffman编码，编码与解码，最少位数的编码? 
+
+;生成Huffman树，从树叶开始归并，结果不唯一 
+
+(define (make-leaf symbol weight)
+    (list 'leaf symbol weight)
+)
+
+(define (leaf? object)
+    (eq? (car object) 'leaf)
+)
+
+(define (symbol-leaf x) (cadr x))
+
+(define (weight-leaf x) (caddr x))
+
+
+(define (make-code-tree left right)
+    (list left
+        right
+        (append (symbols left) (symbols right))
+        (+ (weight left) (weight right))
+    )
+)
+
+(define (left-branch tree) (car tree))
+(define (right-branch tree) (cadr tree))
+
+(define (symbols tree)
+    (if (leaf? tree)
+        (list (symbol-leaf tree))
+        (caddr tree)
+    )
+)
+
+(define (weight tree)
+    (if (leaf? tree)
+        (weight-leaf tree)
+        (cadddr tree)
+    )
+)
+
+;解码过程
+;由0/1表和Huffman树获得编码
+(define (decode bits tree)
+    (define (decode-1 bits current-branch)
+        (if (null? bits)
+            '()
+            (let (
+                (next-branch (choose-branch (car bits) current-branch))
+            )
+                (if (leaf? next-branch);重新从头开始解码下一个
+                    (cons (symbol-leaf next-branch) (decode-1 (cdr bits) tree))
+                    (decode-1 (cdr bits) next-branch)
+                )
+            )
+        )
+    )
+
+    (decode-1 bits tree)
+)
+
+(define (choose-branch bit branch)
+    (cond 
+        ((= bit 0) (left-branch branch))
+        ((= bit 1) (right-branch branch))
+        (else (error "bad bit -- CHOOSE-BRANCH" bit))
+    
+    )
+)
+
+;带权重元素的集合
+
+(define (adjoin-set x set)
+    (cond 
+        ((null? set) (list x))
+        ((< (weight x) (weight (car set))) (cons x set))
+        (else (cons (car set) (adjoin-set x (cdr set))))
+    )
+)
+
+(define (make-leaf-set pairs)
+    (if (null? pairs)
+        '()'
+        (let (
+            (pair (car pairs))
+        )
+            (adjoin-set (make-leaf (car pair) (cadr pair)) (make-leaf-set (cdr pairs)))
+        )
+    )
+)
+
+;抽象数据的多重表示
+
+
+;加类型标志来决定复数data是选用实部虚部表示 还是幅值极坐标表示 
+;构造通用型过程, 类型标志，数据导向程序设计
+;剥去和加上标志的规范方式，即类型，可以成为一种重要的组织策略
+
+;基于类型的dispatch
+
+;scale问题
+;put 和 get， 是不是类似getter and setter
+
+;消息传递：将数据对象设想成一个实体，它以消息的方式接收到所需操作的名字.可用来组织
+;带有通用型操作的系统
+
+
+(define (install-scheme-number-package)
+    (define (tag x) (attach-tag 'scheme-number x))
+    (put 'add '(scheme-number scheme-number)
+        (lambda (x y) (tag (+ x y)))
+    )
+    (put 'sub '(scheme-number scheme-number)
+        (lambda (x y) (tag (- x y)))
+    )
+    (put 'mul '(scheme-number scheme-number)
+        (lambda (x y) (tag (* x y)))
+    )
+    (put 'div '(scheme-number scheme-number)
+        (lambda (x y) (tag (/ x y)))
+    )
+    (put 'make '(scheme-number scheme-number)
+        (lambda (x) (tag x))
+    )
+)
+
+(define (make-scheme-number n)
+    ((get 'make 'scheme-number) n)
+)
+
+;强制：将一种数据类型看作另一种类型的对象
+;类型的层次结构，基类，子类
+
+(define (attach-tag type-tag contents)
+    (cons type-tag contents)
+)
+
+(define (type-tag datum)
+    (if (pair? datum)
+        (car datum)
+        (error "Bad tagged datum -- TYPE-TAG" datum)
+    )
+)
+
+
