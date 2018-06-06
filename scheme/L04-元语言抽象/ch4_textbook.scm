@@ -17,7 +17,7 @@ eval <exp> <env>
 
 
 (define (eval exp env)
-    (cond ((self-evaluatinng? exp) exp)
+    (cond ((self-evaluating? exp) exp)
         ((variable? exp) (lookup-variable-value exp env))
         ((quoted? exp) (text-of-quotation exp))
         ((assignment? exp) (eval-assignment exp env))
@@ -241,6 +241,117 @@ eval <exp> <env>
         )
     )
 )
+
+
+;true false检测
+
+(define (true? exp)
+    (not (eq? exp false))
+)
+(define (false? exp)
+    (eq? exp false)
+)
+
+;过程的表示
+
+(define (make-procedure parameters body env)
+    (list 'procedure parameters body env)
+)
+
+(define (compound-procedure? p)
+    (tagged-list? p 'procedure)
+)
+
+(define (procedure-parameters p) (cadr p))
+(define (procedure-body p) (caddr p))
+(define (procedure-environment p) (cadddr p))
+
+;对环境的操作, 环境看成一个表，表真是太强了(指针)
+
+(define (enclosing-environment env) (cdr env))
+(define (first-frame env) (car env))
+(define the-empty-environment '())
+
+(define (make-frame variables values)
+    (cons variables values)
+)
+
+(define (frame-variables f) (car f))
+(define (frame-values f) (cdr f))
+
+(define (add-binding-to-frame! var val frame)
+    (set-car! frame (cons var (car frame)))
+    (set-cdr! frame (cons val (cdr frame)))
+)
+
+
+(define (extend-environment vars vals base-env)
+    (if (= (length vars) (length vals))
+        (cons (make-frame vars vals) base-env)
+        (if (< (length vars) (length vals))
+            (error "Too many arguments supplied" vars vals)
+            (error "Too few arguments supplied" vars vals)
+        )
+    )
+)
+
+
+(define (lookup-variable-value var env)
+    (define (env-loop env)
+        (define (scan vars vals)
+            (cond ((null? vars) (env-loop (enclosing-environment env)))
+                ((eq? var (car vars)) (car vals))
+                (else (scan (cdr vars) (cdr vals)))
+            )
+        )
+        (if (eq? env the-empty-environment)
+            (error "Unbound variable" var)
+            (let ((frame (first-frame env)))
+                (scan (frame-variables frame) (frame-values frame))
+            )
+        )
+    )
+    (env-loop env)
+)
+
+
+(define (set-variable-value! var env)
+    (define (env-loop env)
+        (define (scan vars vals)
+            (cond ((null? vars) (env-loop (enclosing-environment env)))
+                ((eq? var (car vars)) (set-car! vals val))
+                (else (scan (cdr vars) (cdr vals)))
+            )
+        )
+        (if (eq? env the-empty-environment)
+            (error "Unbound variable -- SET!" var)
+            (let ((frame (first-frame env)))
+                (scan (frame-variables frame) (frame-values frame))
+            )
+        )
+    )
+    (env-loop env)
+)
+
+
+
+(define (define-variable! var val env)
+    (let ((frame (first-frame env)))
+        (define (scan vars vals)
+            (cond ((null? vars) (add-binding-to-frame! var val frame))
+                ((eq? var (car vars)) (set-car! vars val))
+                (else (scan (cdr vars) (cdr vals)))
+            )
+        )
+        (scan (frame-variables frame)
+            (frame-values frame)
+        )
+    )
+)
+
+;上面的效率很低，查找变量的速度慢
+
+;作为程序运行这个求值器
 
 
 
