@@ -1,8 +1,12 @@
 /**
+ * 
+ * 要是真正的用心，而不是以为自己懂了的那种，才能深刻理解，提高效率
+ * think what others are saying. Live every second of your life
+ Fairy tales are more than true: not because they tell us that dragons exist, but because they tell us that dragons can be beaten.
+
  I learn best by doing
  It’s hard for me to wade through paragraphs full of abstract 
- concepts and really absorb them. But if I’ve coded something, ran it,
-  and debugged it, then I get it.
+ concepts and really absorb them. But if I’ve coded something, ran it, and debugged it, then I get it.
 
 
  While I intend to show you that a programming language isn’t as daunting as you might believe, it is still a 

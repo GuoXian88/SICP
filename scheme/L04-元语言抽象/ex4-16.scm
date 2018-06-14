@@ -1,0 +1,80 @@
+;self
+(define (lookup-variable-value var env)
+    (define (env-loop env)
+        (define (scan vars vals)
+            (cond ((null? vars) (env-loop (enclosing-environment env)))
+                ((eq? (car vars) '*unassigned*') (error "Try to use unassigned variable" (car vars)))
+                ((eq? var (car vars)) (car vals))
+                (else (scan (cdr vars) (cdr vals)))
+            )
+        )
+        (if (eq? env the-empty-environment)
+            (error "Unbound variable" var)
+            (let ((frame (first-frame env)))
+                (scan (frame-variables frame) (frame-values frame))
+            )
+        )
+    )
+    (env-loop env)
+)
+;answer
+;; a, change look-up-variable-value 
+ (define (lookup-variable-value var env) 
+         (define (env-lookup env) 
+                 (define (scan vars vals) 
+                         (cond ((null? vars) (env-lookup (enclosing-environment env))) 
+                                   ((eq? var (car vars))  
+                                    (if (eq? (car vals) '*unassigned*) 
+                                            (error "variable is unassigned" var) 
+                                            (car vals))) 
+                                   (else (scan (cdr vars) (cdr vals))))) 
+                 (if (eq? env the-empty-environment) 
+                         (error "Unbound variable" var) 
+                         (let ((frame (first-frame env))) 
+                                 (scan (frame-variables frame) 
+                                           (frame-values frame))))) 
+         (env-lookup env)) 
+  
+  
+ ;; b 
+ ;获取定义的变量名
+ (define (definition-variable exp)
+    (if (symbol? (cadr exp))
+        (cadr exp)
+        (caadr exp)
+    )
+)
+
+(define (make-begin seq) (cons 'begin seq))
+
+ (define (scan-out-defines body)
+        ;给defines赋值 *unassigned
+         (define (name-unassigned defines) 
+                 (map (lambda (x) (list (definition-variable x) '*unassigned*)) defines))
+        ;给defines 设置值 
+         (define (set-values defines) 
+                 (map (lambda (x)  
+                                         (list 'set! (definition-variable x) (definition-value x)))  
+                          defines))
+
+         ;从body中找出定义的和未定义的，给定义的赋值，未定义的给*unassigned
+         (define (defines->let exprs defines not-defines) 
+                 (cond ((null? exprs)  
+                            (if (null? defines) 
+                                    body 
+                                    (list (list 'let (name-unassigned defines)  
+                                                                 (make-begin (append (set-values defines)  
+                                                                                                 (reverse not-defines))))))) 
+                       ((definition?(car exprs)) 
+                            (defines->let (cdr exprs) (cons (car exprs) defines) not-defines)) 
+                           (else (defines->let (cdr exprs) defines (cons (car exprs) not-defines))))) 
+         (defines->let body '() '())) 
+  
+
+(define (make-procedure parameters body env)
+    (list 'procedure parameters body env)
+)
+
+(define (procedure-body p) (caddr p))
+ ;; c 调用次数问题
+ install scan-out-defines into make-procedure. otherwise, when we call procedure-body, procedure scan-out-defines will be called. 

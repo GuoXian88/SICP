@@ -22,7 +22,7 @@
 )
 ;answer
 
-;; left to righ 
+;; left to right 
  (define (list-of-values1 exps env) 
    (if (no-operand? exps) 
        '() 
