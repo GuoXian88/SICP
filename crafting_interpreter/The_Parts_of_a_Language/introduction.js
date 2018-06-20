@@ -26,7 +26,7 @@ There are at least six domain-specific languages used in the little
 system I cobbled together to write and publish this book. What are 
 they?
 这个找不到
-Make cpp YAML Sed Bash CSS HTML?
+sass markdown HTML Make CSS Jinja
 
 
 Get a “Hello, world!” program written and running in Java. Set up 
@@ -41,7 +41,6 @@ doubly-linked list of heap-allocated strings. Write functions to
 insert, find, and delete items from it. Test them.
 
 TODO
-
  */
 
 
