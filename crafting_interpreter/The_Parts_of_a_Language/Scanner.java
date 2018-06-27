@@ -7,6 +7,7 @@ import java.util.Map;
 
 import static com.craftinginterpreters.lox.TokenType.*;
 
+//You’ll recall that the scanner itself was admirably suited to object-orientation. It had all of the mutable state to keep track of where it was in the source code, a well-defined set of public methods, and a handful of private helper ones.
 //想起了stream
 class Scanner {
   private final String source;
